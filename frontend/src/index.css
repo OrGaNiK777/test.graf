@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+	font-family: Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+#root {
+	height: 100vh;
+}
+
+nav {
+	position: fixed;
+	width: 100%;
+	display: flex;
+	justify-content: space-around;
+	background-color: #e3deff;
+}
+
+nav a {
+	text-decoration: none;
+	color: #333;
+	padding: 5px;
+}
+
+nav a:hover {
+	background-color: #ddd;
+}
+
+.image-gallery {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.image-gallery img {
+	width: 150px;
+	margin: 10px;
+}
