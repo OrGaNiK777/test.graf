@@ -56,7 +56,7 @@ const Manager: React.FC<MyComponentProps> = ({ userId, socket }) => {
 			socket.off('user_stopped_typing')
 			socket.off('message')
 		}
-	}, [selectedDialog, userId, dialogs])
+	}, [selectedDialog, userId, dialogs, socket])
 
 	const getInitials = (id: string) => {
 		const words = id.toUpperCase().split(' ')
@@ -99,7 +99,7 @@ const Manager: React.FC<MyComponentProps> = ({ userId, socket }) => {
 		setSelectedDialog(dialog)
 		newMessageDialogIds.delete(dialog.id)
 		setNewMessageDialogIds(new Set(newMessageDialogIds))
-		document.title = `Чат Д` + dialog.id
+		document.title = dialog.name
 		socket.emit('joinDialog', dialog.id)
 	}
 

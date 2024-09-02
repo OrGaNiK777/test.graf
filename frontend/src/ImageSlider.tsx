@@ -1,37 +1,36 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 const ImageSlider: React.FC = () => {
 	const [images, setImages] = useState<string[]>([])
 	const [currentIndex, setCurrentIndex] = useState(0)
 
 	useEffect(() => {
-		// Запрос для получения изображений
+		// Загружаем изображения с сервера
 		fetch('http://localhost:3000/images')
 			.then((response) => response.json())
 			.then((data) => setImages(data))
-			.catch((error) => console.error('Ошибка получения изображений:', error))
 	}, [])
 
-	const nextSlide = () => {
-		setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length)
-	}
-
-	const prevSlide = () => {
+	const goToPrevious = () => {
 		setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length)
 	}
 
-	if (images.length === 0) return <div>Загрузка изображений...</div>
+	const goToNext = () => {
+		setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length)
+	}
 
 	return (
-		<div className='relative w-full max-w-2xl mx-auto'>
-			<button onClick={prevSlide} className='absolute left-0 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-75 p-2 rounded-full shadow-md hover:bg-opacity-100'>
-				<img src='../icon/left.svg'></img>
-			</button>
-			<div className='flex overflow-hidden'>
-				<img src={'http://localhost:3000/images' + images[currentIndex]} alt='Current' className='w-3/3 h-auto object-cover' />
+	<div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}} className='relative mw-[1240px] h-[max] overflow-hidden'>
+			<div className='flex transition-transform duration-300 ease-in-out' style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
+				{images.map((image, index) => (
+					<img style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }} key={index} src={'http://localhost:3000/images' + image} className='w-[1240px] h-[836px] object-cover flex-shrink-0' alt={image} />
+				))}
 			</div>
-			<button onClick={nextSlide} className='absolute right-0 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-75 p-2 rounded-full shadow-md hover:bg-opacity-100'>
-				<img src='../icon/right.svg'></img>
+			<button onClick={goToPrevious} className='absolute left-2 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md'>
+				◀️
+			</button>
+			<button onClick={goToNext} className='absolute right-2 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md'>
+				▶️
 			</button>
 		</div>
 	)

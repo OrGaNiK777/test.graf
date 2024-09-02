@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import ImageSlider from './ImageSlider'
 import Manager from './Manager'
+import Chat from './Chat'
 
 const socket = io('http://localhost:3000') // Подключение к серверу
 
@@ -21,7 +22,7 @@ const App: React.FC = () => {
 		return () => {
 			socket.off('connect')
 		}
-	}, []) // Зависимость от location, чтобы эффект выполнялся при изменении URL
+	}, [userId]) // Зависимость от location, чтобы эффект выполнялся при изменении URL
 
 	return (
 		<Router>
@@ -47,7 +48,15 @@ const App: React.FC = () => {
 				<Link to='' className='text-blue-500 hover:underline ml-4'></Link>
 			</nav>
 			<Routes>
-				<Route path='/' element={<ImageSlider />} />
+				<Route
+					path='/'
+					element={
+						<div className='flex' style={{ display: 'flex', height: '100%', paddingTop: '42.4px' }}>
+							<ImageSlider />
+							<Chat userId={userId} socket={socket} />
+						</div>
+					}
+				/>
 				<Route path='/manager' element={<Manager userId={userId} socket={socket} />} />
 			</Routes>
 		</Router>
