@@ -1,6 +1,7 @@
 import { Server } from 'socket.io'
 
 export const setupSocket = (io: Server) => {
+	let dialogs = {} // Хранение диалогов
 	// Обработка подключения сокетов
 	io.on('connection', (socket) => {
 		console.log(`User connected: ${socket.id}`)
@@ -11,6 +12,16 @@ export const setupSocket = (io: Server) => {
 
 		socket.on('leaveDialog', (dialogId) => {
 			socket.leave(dialogId) // Удаляем пользователя из комнаты
+		})
+		socket.on('createDialog', ({ userId }) => {
+			// Создаем новый диалог для клиента
+			if (!dialogs[userId]) {
+				dialogs[userId] = {
+					id: userId,
+					messages: [], // Массив сообщений для этого диалога
+				}
+				console.log(`Dialog created for user: ${userId}`)
+			}
 		})
 
 		socket.on('typing', ({ dialogId, user }) => {
@@ -23,8 +34,13 @@ export const setupSocket = (io: Server) => {
 		})
 
 		// Обработка получения сообщений
-		socket.on('message', ({ dialogId, message }) => {
-			socket.broadcast.emit('message', { dialogId, message }) // Отправка сообщения только в нужный диалог
+		socket.on('message', (message) => {
+			const { user } = message // Извлекаем ID пользователя из сообщения
+			if (dialogs[user]) {
+				dialogs[user].messages.push(message) // Добавляем сообщение в соответствующий диалог
+				// Отправляем сообщение всем участникам диалога
+				io.emit('message', message)
+			}
 		})
 
 		// Обработка отключения пользователя

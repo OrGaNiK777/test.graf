@@ -10,13 +10,15 @@ const socket = io('http://localhost:3000') // Подключение к серв
 const App: React.FC = () => {
 	const [userId, setUserId] = useState<string>('') // Статус для userId
 
+	const getInitials = (id: any) => {
+		const words = id.toUpperCase().split(' ')
+		return words.length > 1 ? words[0][0] + words[1][0] : words[0].substring(0, 2)
+	}
 	useEffect(() => {
 		// Установить userId, если socket.id доступен
 		socket.on('connect', () => {
 			setUserId(socket.id || '') // Сохраняем текущий socket.id
 		})
-
-		console.log(userId)
 
 		// Очищаем сокет при размонтировании компонента
 		return () => {
@@ -57,7 +59,7 @@ const App: React.FC = () => {
 						</div>
 					}
 				/>
-				<Route path='/manager' element={<Manager userId={userId} socket={socket} />} />
+				<Route path='/manager' element={<Manager getInitials={getInitials} userId={userId} socket={socket} />} />
 			</Routes>
 		</Router>
 	)

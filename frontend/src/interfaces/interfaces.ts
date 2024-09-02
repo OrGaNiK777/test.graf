@@ -14,7 +14,21 @@ export interface Dialog {
 }
 
 // Интерфейс для пропсов компонента
-export interface MyComponentProps {
+export interface ManagerProps {
 	userId: string
 	socket: Socket
+	getInitials: any
+}
+
+export interface ChatProps {
+	selectedDialog: Dialog | null
+	messages: { [key: number]: Message[] }
+	userId: string
+	socket: any
+	message: string
+	setMessage: (msg: string) => void
+	handleSubmit: (e: React.FormEvent) => void
+	handleTyping: () => void
+	handleBlur: () => void
+	getInitials: any
 }
