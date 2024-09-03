@@ -89,7 +89,7 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials }) => {
 	}
 
 	return (
-		<div style={{ display: 'flex', height: '100%', paddingTop: '42.4px' }}>
+		<div style={{ display: 'flex', height: '100%', paddingTop: '64px' }}>
 			<div style={{ width: '360px', borderRight: '1px solid #EBECF2' }}>
 				<ul>
 					{dialogs.map((dialog) => (

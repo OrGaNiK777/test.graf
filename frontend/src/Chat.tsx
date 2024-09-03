@@ -8,7 +8,7 @@ const Chat: React.FC<ChatProps> = ({ selectedDialog, messages, userId, message, 
 		<div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }}>
 			{selectedDialog ? (
 				<>
-					<div style={{ flexGrow: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column-reverse', padding: '16px', paddingBottom: '41px', backgroundColor: '#f1f1f1' }}>
+					<div style={{ flexGrow: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column-reverse', padding: '16px', paddingBottom: '50px', backgroundColor: '#f1f1f1' }}>
 						{(messages[selectedDialog?.id] || []).map((msg, index, arr) => {
 							const isFirstMessageFromUser = index === 0 || arr[index - 1].user !== msg.user
 							const marginStyle = isFirstMessageFromUser ? { margin: '2px 0px 14px 0px' } : { margin: '2px 0px 2px 0px' }
@@ -48,13 +48,35 @@ const Chat: React.FC<ChatProps> = ({ selectedDialog, messages, userId, message, 
 										}}
 									>
 										<p style={{ fontSize: '14px', fontWeight: '400', lineHeight: '18.2px', textAlign: 'left', maxWidth: '360px', overflow: 'hidden' }}>{msg.text}</p>
-										{/* Вставить здесь ваш индикатор сообщения */}
+										<div
+											style={{
+												position: 'absolute',
+												bottom: '0px',
+												left: '-7px',
+												width: '7px', // Ширина заостренного угла
+												height: '12px', // Высота заостренного угла
+												backgroundColor: msg.user === userId ? '#B9D7FB' : '#E2EAF1',
+												zIndex: 0,
+											}}
+										></div>
+										<div
+											style={{
+												position: 'absolute',
+												borderRadius: '0% 0% 100% 0%', // Закругление углов
+												bottom: '0px',
+												left: '-7px',
+												width: '7px', // Ширина заостренного угла
+												height: '12px', // Высота заостренного угла
+												backgroundColor: '#f1f1f1',
+												zIndex: 0,
+											}}
+										></div>
 									</div>
 								</div>
 							)
 						})}
 					</div>
-					<form onSubmit={handleSubmit} style={{ display: 'flex', marginTop: '16px', position: 'absolute', bottom: '0px', width: '100%' }}>
+					<form onReset={handleBlur} onSubmit={handleSubmit} style={{ display: 'flex', marginTop: '16px', position: 'absolute', bottom: '0px', width: '100%' }}>
 						<input
 							maxLength={82}
 							type='text'
