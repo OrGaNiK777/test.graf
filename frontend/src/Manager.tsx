@@ -1,40 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import { ManagerProps, Dialog, Message } from './interfaces/interfaces'
-import Chat from './Chat' // Импортируем компонент Chat
+import ManagerChat from './ManagerChat' // Импортируем компонент Chat
 
-const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials }) => {
-	const [dialogs] = useState<Dialog[]>([
-		{ id: 1, name: 'Диалог 1' },
-		{ id: 2, name: 'Диалог 2' },
-		{ id: 3, name: 'Диалог 3' },
-		{ id: 4, name: 'Диалог 4' },
-		{ id: 5, name: 'Диалог 5' },
-		{ id: 6, name: 'Диалог 6' },
-		{ id: 7, name: 'Диалог 7' },
-		{ id: 8, name: 'Диалог 8' },
-	])
+const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUsers, setTypingUsers }) => {
+	const [dialogs, setDialogs] = useState<Dialog[]>([])
 	const [selectedDialog, setSelectedDialog] = useState<Dialog | null>(null)
 	const [message, setMessage] = useState('')
 	const [messages, setMessages] = useState<{ [key: number]: Message[] }>({})
-	const [typingUsers, setTypingUsers] = useState<{ [key: number]: string }>({})
 	const [newMessageDialogIds, setNewMessageDialogIds] = useState<Set<number>>(new Set())
 
 	useEffect(() => {
-		// Установить userId, если socket.id доступен
-
-		socket.on('typing', ({ dialogId, user }: { dialogId: number; user: string }) => {
-			setTypingUsers((prev) => ({
-				...prev,
-				[dialogId]: user,
-			}))
-
-			socket.on('user_stopped_typing', () => {
-				setTypingUsers((prev) => {
-					const newTypingUsers = { ...prev }
-					delete newTypingUsers[dialogId]
-					return newTypingUsers
-				})
-			})
+		// Слушаем обновления диалогов
+		socket.on('dialogs', (updatedDialogs: Dialog[]) => {
+			setDialogs(updatedDialogs)
 		})
 
 		socket.on('message', ({ dialogId, message }: { dialogId: number; message: Message }) => {
@@ -53,12 +31,11 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials }) => {
 
 		// Очищаем сокет при размонтировании компонента
 		return () => {
-			socket.off('connect')
-			socket.off('typing')
-			socket.off('user_stopped_typing')
+			socket.off('dialogs')
 			socket.off('message')
 		}
 	}, [selectedDialog, userId, dialogs, socket])
+
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault()
 		if (message.trim() && selectedDialog) {
@@ -77,6 +54,7 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials }) => {
 			setTypingUsers((prev) => ({ ...prev, [selectedDialog.id]: '' }))
 		}
 	}
+	console.log(typingUsers)
 	const handleDialogClick = (dialog: Dialog) => {
 		if (selectedDialog) {
 			socket.emit('leaveDialog', selectedDialog.id)
@@ -95,7 +73,7 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials }) => {
 					{dialogs.map((dialog) => (
 						<div key={dialog.id}>
 							<button
-								style={{ marginLeft: '12px' }}
+								style={{ paddingLeft: '12px' }}
 								className={`flex items-center w-full text-left py-2 transition-colors duration-300 
 									${selectedDialog?.id === dialog.id ? 'bg-blue-200' : 'bg-white'} 
 									${newMessageDialogIds.has(dialog.id) ? 'text-red-500' : 'text-black'} 
@@ -121,7 +99,7 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials }) => {
 									{getInitials(dialog.name)}
 								</div>
 								<div>
-									<p style={{ color: '#000000' }}>{dialog.name}</p>
+									<p style={{ color: '#000000', fontSize: '14px', fontWeight: '600', lineHeight: '16.8px' }}>{dialog.name}</p>
 									<p
 										style={{
 											fontSize: '14px',
@@ -137,8 +115,8 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials }) => {
 						</div>
 					))}
 				</ul>
-			</div>{' '}
-			<Chat
+			</div>
+			<ManagerChat
 				selectedDialog={selectedDialog}
 				messages={messages}
 				userId={userId}

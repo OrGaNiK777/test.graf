@@ -23,13 +23,13 @@ const ImageSlider: React.FC = () => {
 		<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }} className='relative w-[100%] h-[max] overflow-hidden'>
 			<div className='flex transition-transform duration-300 ease-in-out' style={{ transform: `translateX(-${currentIndex * 100}%)`, width: '1240px' }}>
 				{images.map((image, index) => (
-					<img style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 4px 0 4px' }} key={index} src={'http://localhost:3000/images' + image} className='w-[1240px] h-[1050px] object-cover flex-shrink-0' alt={image} />
+					<img style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 4px 0 4px' }} key={index} src={'http://localhost:3000/images' + image} className='w-[1240px] h-[1000px] object-cover flex-shrink-0' alt={image} />
 				))}
 			</div>
-			<button onClick={goToPrevious} className='absolute left-80 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md'>
+			<button onClick={goToPrevious} className='absolute left-2 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md'>
 				<img src='../icon/left.svg'></img>
 			</button>
-			<button onClick={goToNext} className='absolute right-80 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md'>
+			<button onClick={goToNext} className='absolute right-2 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md'>
 				<img src='../icon/right.svg'></img>
 			</button>
 		</div>

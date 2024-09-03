@@ -3,18 +3,36 @@ import { Socket } from 'socket.io-client'
 // Интерфейс, описывающий структуру объекта Message
 export interface Message {
 	id: number
-	user: string
-	text: string
+	user: any
+	text: any
 }
 
 // Интерфейс для описания диалога
 export interface Dialog {
-	id: number
-	name: string
+	id: any
+	name: any
 }
 
 // Интерфейс для пропсов компонента
 export interface ManagerProps {
+	userId: string
+	socket: Socket
+	getInitials: any
+	dialogs: any
+	typingUsers: any
+	setTypingUsers: any
+	message: string
+	setMessage: any
+	messages: { [key: number]: Message[] }
+	setMessages: (msg: string) => void
+	selectedDialog: Dialog | null
+	setSelectedDialog: any
+	newMessageDialogIds: any
+	setNewMessageDialogIds: any
+	handleSubmit: any
+}
+// Интерфейс для пропсов компонента
+export interface MyComponentProps {
 	userId: string
 	socket: Socket
 	getInitials: any
