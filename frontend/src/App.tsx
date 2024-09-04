@@ -3,14 +3,13 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import ImageSlider from './ImageSlider'
 import Manager from './Manager'
-import Chat from './ManagerChat'
 import ClientChat from './ClientChat'
 
 const socket = io('http://localhost:3000') // Подключение к серверу
 
 const App: React.FC = () => {
 	const [userId, setUserId] = useState<string>('') // Статус для userId
-	const [typingUsers, setTypingUsers] = useState<{ [key: number]: string }>({})
+	const [typingUsers, setTypingUsers] = useState<{ [key: string]: string }>({})
 	const getInitials = (id: any) => {
 		const words = id.toUpperCase().split(' ')
 		return words.length > 1 ? words[0][0] + words[1][0] : words[0].substring(0, 2)
@@ -70,13 +69,13 @@ const App: React.FC = () => {
 				<Route
 					path='/'
 					element={
-						<div style={{ display: 'flex', height: '100%', width:"100%", paddingTop: '42.4px' }}>
+						<div style={{ display: 'flex', height: '100%', width: '100%', paddingTop: '42.4px' }}>
 							<ImageSlider />
-							<ClientChat userId={userId} socket={socket} getInitials={getInitials} typingUsers={typingUsers} setTypingUsers={setTypingUsers} />
+							<ClientChat userId={userId} socket={socket} getInitials={getInitials} typingUsers={typingUsers} />
 						</div>
 					}
 				/>
-				<Route path='/manager' element={<Manager typingUsers={typingUsers} setTypingUsers={setTypingUsers} getInitials={getInitials} userId={userId} socket={socket} />} />
+				<Route path='/manager' element={<Manager typing='' typingUsers={typingUsers} getInitials={getInitials} userId={userId} socket={socket} />} />
 			</Routes>
 		</Router>
 	)

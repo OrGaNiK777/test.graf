@@ -2,8 +2,7 @@ import { Server } from 'socket.io'
 
 export const setupSocket = (io: Server) => {
 	let dialogs: { [key: string]: Dialog } = {} // Хранение диалогов
-	let messages: { [key: string]: Message[] } = {} // Хранение сообщений
-
+	let messages: { [dialogId: string]: Message[] } = {}
 	// Обработка подключения сокетов
 	io.on('connection', (socket) => {
 		console.log(`Пользователь подключен: ${socket.id}`)

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { Message, MyComponentProps } from './interfaces/interfaces'
+import { ClientChatProps, Message } from './interfaces/interfaces'
 import Chat from './Chat'
 
-const ClientChat: React.FC<MyComponentProps> = ({ userId, socket, getInitials, typingUsers, setTypingUsers }) => {
+const ClientChat: React.FC<ClientChatProps> = ({ userId, socket, getInitials, typingUsers }) => {
 	const [message, setMessage] = useState('')
 	const [messages, setMessages] = useState<{ [key: number]: Message[] }>({})
 
@@ -26,7 +26,7 @@ const ClientChat: React.FC<MyComponentProps> = ({ userId, socket, getInitials, t
 
 		if (message.trim()) {
 			console.log(messages)
-			const messageObject: Message = { id: Date.now(), user: userId, text: message }
+			const messageObject: Message = { id: Date.now(), user: userId, text: message, dialogId: -1 }
 			// Отправляем сообщение на сервер
 			socket.emit('message', { dialogId: userId, message: messageObject })
 			setMessage('')
@@ -35,10 +35,9 @@ const ClientChat: React.FC<MyComponentProps> = ({ userId, socket, getInitials, t
 
 	return (
 		<div style={{ position: 'relative', display: 'flex', flexDirection: 'column', width: '720px' }}>
-			{typingUsers[userId] ? typingUsers[userId] + ' печатает...' : ''}
 			<h1 style={{ padding: '16px', fontSize: '20px', fontWeight: '600', lineHeight: '24px', height: '56px', marginTop: '20px', border: '1px solid #EBECF2' }}>Чат с поддержкой</h1>
 			<Chat
-				selectedDialog={userId}
+				selectedDialog={{ id: userId }}
 				messages={messages}
 				userId={userId}
 				message={message}
@@ -51,6 +50,7 @@ const ClientChat: React.FC<MyComponentProps> = ({ userId, socket, getInitials, t
 				handleBlur={() => {
 					socket.emit('stop_typing')
 				}}
+				typing={typingUsers[userId] ? typingUsers[userId] + ' печатает...' : ''}
 			/>
 		</div>
 	)

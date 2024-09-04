@@ -1,22 +1,22 @@
 import React, { useState } from 'react'
 import { ChatProps } from './interfaces/interfaces'
 
-const Chat: React.FC<ChatProps> = ({ selectedDialog, messages, userId, message, setMessage, handleSubmit, handleTyping, handleBlur, getInitials }) => {
+const Chat: React.FC<ChatProps> = ({ selectedDialog, messages, userId, message, setMessage, handleSubmit, handleTyping, handleBlur, getInitials, typing }) => {
 	const [isInputFocused, setIsInputFocused] = useState(false)
 
 	function InputFocus() {
 		handleTyping()
 		setIsInputFocused(true)
 	}
+
 	function InputBlur() {
 		handleBlur()
 		setIsInputFocused(false)
 	}
-
 	return (
 		<>
-			<div style={{ flexGrow: 1, overflowY: 'auto', display: 'flex', justifyContent: 'end', flexDirection: 'column', padding: '16px', paddingBottom: '62px', backgroundColor: '#f1f1f1' }}>
-				{(messages[selectedDialog] || []).map((msg, index, arr) => {
+			<div style={{ flexGrow: 1, overflowY: 'auto', display: 'flex', justifyContent: 'end', flexDirection: 'column', padding: '16px', backgroundColor: '#f1f1f1' }}>
+				{(messages[selectedDialog?.id] || []).map((msg, index, arr) => {
 					const isFirstMessageFromUser = index === 0 || arr[index - 1].user !== msg.user
 					const marginStyle = isFirstMessageFromUser ? { margin: '14px 0px 2px 0px' } : { margin: '2px 0px 2px 0px' }
 					return (
@@ -81,9 +81,10 @@ const Chat: React.FC<ChatProps> = ({ selectedDialog, messages, userId, message, 
 						</div>
 					)
 				})}
+				<p style={{ paddingBottom: '30px', fontSize: '14px', fontWeight: '400', color: 'gray' }}>{typing}.</p>
 			</div>
-			<form onReset={handleBlur} onSubmit={handleSubmit} style={{ display: 'flex', marginTop: '16px', position: 'absolute', bottom: '0px', width: '100%', height: '48px', border: '1px solid #EBECF2' }}>
-				<input maxLength={82} type='text' value={message} onFocus={InputFocus} onBlur={InputBlur} onChange={(e) => setMessage(e.target.value)} placeholder='Написать сообщение...' style={{ outline: 'none', border: 'none', padding: '8px 8px 8px 16px', flexGrow: 1, color: '#14161F', fontSize: '14px' }} />
+			<form onBlur={InputBlur} onSubmit={handleSubmit} style={{ display: 'flex', marginTop: '16px', position: 'absolute', bottom: '0px', width: '100%', height: '48px', border: '1px solid #EBECF2' }}>
+				<input maxLength={82} type='text' value={message} onFocus={InputFocus} onChange={(e) => setMessage(e.target.value)} placeholder='Написать сообщение...' style={{ outline: 'none', border: 'none', padding: '8px 8px 8px 16px', flexGrow: 1, color: '#14161F', fontSize: '14px' }} />
 				<button style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'absolute', right: '12px', top: '12px', width: '24px', height: '24px' }} type='submit'>
 					<img style={{ width: '14.97px', height: '15.2px' }} src={isInputFocused ? '../icon/sel1.svg' : '../icon/sel2.svg'}></img>
 				</button>

@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { ManagerProps, Dialog, Message } from './interfaces/interfaces'
-import ManagerChat from './ManagerChat' // Импортируем компонент Chat
+import { Dialog, ManagerProps, Message } from './interfaces/interfaces'
+import ManagerChat from './ManagerChat'
 
-const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUsers, setTypingUsers }) => {
+const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUsers }) => {
 	const [dialogs, setDialogs] = useState<Dialog[]>([])
 	const [selectedDialog, setSelectedDialog] = useState<Dialog | null>(null)
 	const [message, setMessage] = useState('')
 	const [messages, setMessages] = useState<{ [key: number]: Message[] }>({})
-	const [newMessageDialogIds, setNewMessageDialogIds] = useState<Set<number>>(new Set())
 
 	useEffect(() => {
 		// Слушаем обновления диалогов
@@ -15,6 +14,7 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUs
 			setDialogs(updatedDialogs)
 		})
 
+		// Обработка нового сообщения
 		socket.on('message', ({ dialogId, message }: { dialogId: number; message: Message }) => {
 			if (message.user !== userId) {
 				setMessages((prevMessages) => ({
@@ -23,14 +23,31 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUs
 				}))
 
 				if (selectedDialog?.id !== dialogId) {
-					setNewMessageDialogIds((prev) => new Set(prev).add(dialogId))
 					document.title = `Новое сообщение в ${dialogs.find((dialog) => dialog.id === dialogId)?.name}`
 				}
 			}
 		})
 
+		// Получение предыдущих сообщений при подключении
+		socket.on('previousMessages', (previousMessages: Message[]) => {
+			const groupedMessages: { [key: number]: Message[] } = {}
+
+			previousMessages.forEach((msg) => {
+				if (!groupedMessages[msg.dialogId]) {
+					groupedMessages[msg.dialogId] = []
+				}
+				groupedMessages[msg.dialogId].push(msg)
+			})
+
+			setMessages((prevMessages) => ({
+				...prevMessages,
+				...groupedMessages,
+			}))
+		})
+
 		// Очищаем сокет при размонтировании компонента
 		return () => {
+			socket.off('previousMessages')
 			socket.off('dialogs')
 			socket.off('message')
 		}
@@ -39,29 +56,31 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUs
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault()
 		if (message.trim() && selectedDialog) {
-			const messageObject: Message = { id: Date.now(), user: userId, text: message }
+			const messageObject: Message = {
+				id: Date.now(),
+				user: userId,
+				text: message,
+				dialogId: selectedDialog.id, // Убедитесь, что Вы передаете dialogId
+			}
 			socket.emit('message', { dialogId: selectedDialog.id, message: messageObject })
 
-			setMessages((prevMessages) => {
-				const updatedMessages = {
-					...prevMessages,
-					[selectedDialog.id]: [...(prevMessages[selectedDialog.id] || []), messageObject],
-				}
-				return updatedMessages
-			})
+			setMessages((prevMessages) => ({
+				...prevMessages,
+				[selectedDialog.id]: [
+					...(prevMessages[selectedDialog.id] || []),
+					messageObject, // Здесь также добавьте messageObject с dialogId
+				],
+			}))
 
 			setMessage('')
-			setTypingUsers((prev) => ({ ...prev, [selectedDialog.id]: '' }))
 		}
 	}
-	console.log(typingUsers)
+
 	const handleDialogClick = (dialog: Dialog) => {
 		if (selectedDialog) {
 			socket.emit('leaveDialog', selectedDialog.id)
 		}
 		setSelectedDialog(dialog)
-		newMessageDialogIds.delete(dialog.id)
-		setNewMessageDialogIds(new Set(newMessageDialogIds))
 		document.title = dialog.name
 		socket.emit('joinDialog', dialog.id)
 	}
@@ -76,7 +95,6 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUs
 								style={{ paddingLeft: '12px' }}
 								className={`flex items-center w-full text-left py-2 transition-colors duration-300 
 									${selectedDialog?.id === dialog.id ? 'bg-blue-200' : 'bg-white'} 
-									${newMessageDialogIds.has(dialog.id) ? 'text-red-500' : 'text-black'} 
 									hover:bg-[#EBECF2]`}
 								onClick={() => handleDialogClick(dialog)}
 							>
@@ -116,11 +134,12 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUs
 					))}
 				</ul>
 			</div>
+
 			<ManagerChat
+				typing={''}
 				selectedDialog={selectedDialog}
 				messages={messages}
 				userId={userId}
-				socket={socket}
 				message={message}
 				setMessage={setMessage}
 				handleSubmit={handleSubmit}
