@@ -9,7 +9,7 @@ const app = express()
 const server = http.createServer(app)
 const io = new Server(server, {
 	cors: {
-		origin: 'http://localhost:5173', // Порт Vite
+		origin: 'http://localhost:5173',
 		methods: ['GET', 'POST'],
 		allowedHeaders: ['Content-Type'],
 	},
@@ -20,18 +20,13 @@ app.use(
 		methods: ['GET', 'POST'],
 	})
 )
-// Статические файлы
 app.use('/images', express.static(path.join(__dirname, '../public')))
 
-// Массив с картинками
 const images = ['/image1.png', '/image2.png', '/image3.png', '/image4.png', '/image5.png', '/image6.png', '/image7.png']
 
-// Обработка запроса на получение изображений
 app.get('/images', (req, res) => {
 	res.json(images)
 })
-
-// Настройка сокетов
 setupSocket(io)
 
 const PORT = process.env.PORT || 3000

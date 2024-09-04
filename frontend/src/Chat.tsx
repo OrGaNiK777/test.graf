@@ -13,25 +13,20 @@ const Chat: React.FC<ChatProps> = ({ selectedDialog, messages, userId, message, 
 		handleBlur()
 		setIsInputFocused(false)
 	}
+
 	return (
 		<>
-			<div style={{ flexGrow: 1, overflowY: 'auto', display: 'flex', justifyContent: 'end', flexDirection: 'column', padding: '16px', backgroundColor: '#f1f1f1' }}>
+			<div className='flex-grow overflow-y-auto flex flex-col justify-end p-4' style={{ backgroundColor: '#f1f1f1' }}>
 				{(messages[selectedDialog?.id] || []).map((msg, index, arr) => {
 					const isFirstMessageFromUser = index === 0 || arr[index - 1].user !== msg.user
 					const marginStyle = isFirstMessageFromUser ? { margin: '14px 0px 2px 0px' } : { margin: '2px 0px 2px 0px' }
 					return (
-						<div key={msg.id} style={{ display: 'flex', alignItems: 'end', ...marginStyle }}>
+						<div key={msg.id} className={`flex items-end`} style={{ ...marginStyle }}>
 							<div
+								className={`w-9 h-9 rounded-full flex justify-center items-center mr-1`}
 								style={{
-									width: '36px',
-									height: '36px',
-									borderRadius: '50%',
 									backgroundColor: msg.user === userId ? '#B9D7FB' : '#E2EAF1',
 									color: '#111C26',
-									display: 'flex',
-									justifyContent: 'center',
-									alignItems: 'center',
-									marginRight: '3px',
 									fontSize: '15px',
 									fontWeight: '600',
 									lineHeight: '12px',
@@ -41,56 +36,42 @@ const Chat: React.FC<ChatProps> = ({ selectedDialog, messages, userId, message, 
 							>
 								{getInitials(msg.user)}
 							</div>
-							<div
-								style={{
-									display: 'flex',
-									alignItems: 'flex-end',
-									backgroundColor: msg.user === userId ? '#B9D7FB' : '#E2EAF1',
-									borderRadius: '8px 8px 8px 0px',
-									padding: '8px 12px',
-									width: '420px',
-									height: '52px',
-									position: 'relative',
-								}}
-							>
-								<p style={{ fontSize: '14px', fontWeight: '600', lineHeight: '18.2px', textAlign: 'left', maxWidth: '360px', overflow: 'hidden' }}>{msg.text}</p>
+							<div className={`flex items-end p-2 relative`} style={{ width: '420px', height: '52px', borderRadius: '8px 8px 8px 0px', backgroundColor: msg.user === userId ? '#B9D7FB' : '#E2EAF1' }}>
+								<p className='text-sm font-semibold' style={{ maxWidth: '360px', overflow: 'hidden' }}>
+									{msg.text}
+								</p>
 								<div
+									className={`absolute bottom-0 left-[-14px]`}
 									style={{
-										position: 'absolute',
-										bottom: '0px',
-										left: '-14px',
 										width: '14px', // Ширина заостренного угла
 										height: '24px', // Высота заостренного угла
 										backgroundColor: msg.user === userId ? '#B9D7FB' : '#E2EAF1',
-										zIndex: 0,
 									}}
 								></div>
 								<div
+									className='absolute rounded-full bottom-0 left-[-14px] '
 									style={{
-										position: 'absolute',
+										backgroundColor: '#f1f1f1',
 										borderRadius: '0% 0% 100% 0%', // Закругление углов
-										bottom: '0px',
-										left: '-14px',
 										width: '14px', // Ширина заостренного угла
 										height: '24px', // Высота заостренного угла
-										backgroundColor: '#f1f1f1',
-										zIndex: 0,
 									}}
 								></div>
 							</div>
 						</div>
 					)
 				})}
-				<p style={{ paddingBottom: '30px', fontSize: '14px', fontWeight: '400', color: 'gray' }}>{typing}.</p>
+				<p className='pb-8 text-sm text-gray-500'>{typing}.</p>
 			</div>
-			<form onBlur={InputBlur} onSubmit={handleSubmit} style={{ display: 'flex', marginTop: '16px', position: 'absolute', bottom: '0px', width: '100%', height: '48px', border: '1px solid #EBECF2' }}>
-				<input maxLength={82} type='text' value={message} onFocus={InputFocus} onChange={(e) => setMessage(e.target.value)} placeholder='Написать сообщение...' style={{ outline: 'none', border: 'none', padding: '8px 8px 8px 16px', flexGrow: 1, color: '#14161F', fontSize: '14px' }} />
-				<button style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'absolute', right: '12px', top: '12px', width: '24px', height: '24px' }} type='submit'>
-					<img style={{ width: '14.97px', height: '15.2px' }} src={isInputFocused ? '../icon/sel1.svg' : '../icon/sel2.svg'}></img>
+			<form onBlur={InputBlur} onSubmit={handleSubmit} className='flex mt-4 border-t border-gray-300 absolute bottom-0 w-full h-12'>
+				<input maxLength={82} type='text' value={message} onFocus={InputFocus} onChange={(e) => setMessage(e.target.value)} placeholder='Написать сообщение...' className='outline-none border-none p-2 pl-4 flex-grow text-gray-800 text-sm' />
+				<button className='flex justify-center items-center absolute right-3 top-1/3' type='submit'>
+					<img className='w-4 h-4' src={isInputFocused ? '../icon/sel1.svg' : '../icon/sel2.svg'} alt='send icon' />
 				</button>
 			</form>
 		</>
 	)
 }
+// Функция для обрезки текста сообщения до 50 символов
 
 export default Chat

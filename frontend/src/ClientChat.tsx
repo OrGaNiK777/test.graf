@@ -9,13 +9,12 @@ const ClientChat: React.FC<ClientChatProps> = ({ userId, socket, getInitials, ty
 	useEffect(() => {
 		// Слушаем сообщения от других пользователей
 		socket.on('message', ({ dialogId, message }: { dialogId: number; message: Message }) => {
-			console.log(dialogId) // Используем user как id диалога
-
 			setMessages((prevMessages) => ({
 				...prevMessages,
 				[dialogId]: [...(prevMessages[dialogId] || []), message],
 			}))
 		})
+
 		return () => {
 			socket.off('message')
 		}
@@ -25,7 +24,6 @@ const ClientChat: React.FC<ClientChatProps> = ({ userId, socket, getInitials, ty
 		e.preventDefault()
 
 		if (message.trim()) {
-			console.log(messages)
 			const messageObject: Message = { id: Date.now(), user: userId, text: message, dialogId: -1 }
 			// Отправляем сообщение на сервер
 			socket.emit('message', { dialogId: userId, message: messageObject })
@@ -34,8 +32,8 @@ const ClientChat: React.FC<ClientChatProps> = ({ userId, socket, getInitials, ty
 	}
 
 	return (
-		<div style={{ position: 'relative', display: 'flex', flexDirection: 'column', width: '720px' }}>
-			<h1 style={{ padding: '16px', fontSize: '20px', fontWeight: '600', lineHeight: '24px', height: '56px', marginTop: '20px', border: '1px solid #EBECF2' }}>Чат с поддержкой</h1>
+		<div className='relative flex flex-col w-[720px] border-l border-gray-300'>
+			<h1 className='p-4 text-lg font-semibold leading-6  mt-6'>Чат с поддержкой</h1>
 			<Chat
 				selectedDialog={{ id: userId }}
 				messages={messages}

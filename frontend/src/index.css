@@ -27,17 +27,6 @@ nav a {
 	color: #333;
 	padding: 5px;
 }
-
 nav a:hover {
-	background-color: #ddd;
-}
-
-.image-gallery {
-	display: flex;
-	flex-wrap: wrap;
-}
-
-.image-gallery img {
-	width: 150px;
-	margin: 10px;
+	background-color: #d6d6d6;
 }

@@ -3,6 +3,7 @@ import { Server } from 'socket.io'
 export const setupSocket = (io: Server) => {
 	let dialogs: { [key: string]: Dialog } = {} // Хранение диалогов
 	let messages: { [dialogId: string]: Message[] } = {}
+
 	// Обработка подключения сокетов
 	io.on('connection', (socket) => {
 		console.log(`Пользователь подключен: ${socket.id}`)
@@ -15,6 +16,13 @@ export const setupSocket = (io: Server) => {
 		// Пользователь покидает диалог
 		socket.on('leaveDialog', (dialogId: string) => {
 			socket.leave(dialogId) // Удаление пользователя из комнаты
+		})
+
+		// Предположим, что это в файле с настройками сокета
+		socket.on('getPreviousMessages', (dialogId) => {
+			if (messages[dialogId]) {
+				socket.emit('previousMessages', messages[dialogId])
+			}
 		})
 
 		// Отправляем список диалогов при подключении
@@ -34,13 +42,12 @@ export const setupSocket = (io: Server) => {
 		// Обработка входящих сообщений
 		socket.on('message', (data: { message: Message; dialogId: string }) => {
 			const { message, dialogId } = data
-			console.log(messages, dialogId)
 			// Добавляем сообщение в соответствующий диалог
 			if (!messages[dialogId]) {
 				messages[dialogId] = []
 			}
 			messages[dialogId].push(message)
-
+			console.log(messages)
 			// Добавляем диалог, если его еще нет
 			if (!dialogs[dialogId]) {
 				console.log(`Создался диалок: ${dialogId}`)
@@ -55,10 +62,10 @@ export const setupSocket = (io: Server) => {
 		// Обработка отключения пользователя
 		socket.on('disconnect', () => {
 			console.log('Client disconnected:', socket.id)
-			// Удаляем диалог при отключении
+
 			delete dialogs[socket.id]
 			delete messages[socket.id]
-			io.emit('dialogs', Object.values(dialogs)) // Отправляем обновленный список диалогов
+			io.emit('dialogs', Object.values(dialogs))
 		})
 	})
 }

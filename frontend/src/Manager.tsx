@@ -9,6 +9,10 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUs
 	const [messages, setMessages] = useState<{ [key: number]: Message[] }>({})
 
 	useEffect(() => {
+		if (selectedDialog) {
+			socket.emit('getPreviousMessages', selectedDialog.id)
+		}
+
 		// Слушаем обновления диалогов
 		socket.on('dialogs', (updatedDialogs: Dialog[]) => {
 			setDialogs(updatedDialogs)
@@ -44,7 +48,7 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUs
 				...groupedMessages,
 			}))
 		})
-
+		console.log(messages)
 		// Очищаем сокет при размонтировании компонента
 		return () => {
 			socket.off('previousMessages')
@@ -60,16 +64,13 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUs
 				id: Date.now(),
 				user: userId,
 				text: message,
-				dialogId: selectedDialog.id, // Убедитесь, что Вы передаете dialogId
+				dialogId: selectedDialog.id,
 			}
 			socket.emit('message', { dialogId: selectedDialog.id, message: messageObject })
 
 			setMessages((prevMessages) => ({
 				...prevMessages,
-				[selectedDialog.id]: [
-					...(prevMessages[selectedDialog.id] || []),
-					messageObject, // Здесь также добавьте messageObject с dialogId
-				],
+				[selectedDialog.id]: [...(prevMessages[selectedDialog.id] || []), messageObject],
 			}))
 
 			setMessage('')
@@ -86,48 +87,21 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUs
 	}
 
 	return (
-		<div style={{ display: 'flex', height: '100%', paddingTop: '64px' }}>
-			<div style={{ width: '360px', borderRight: '1px solid #EBECF2' }}>
+		<div className='flex h-full pt-16'>
+			<div className='w-[360px] border-r border-gray-300'>
 				<ul>
 					{dialogs.map((dialog) => (
 						<div key={dialog.id}>
 							<button
-								style={{ paddingLeft: '12px' }}
 								className={`flex items-center w-full text-left py-2 transition-colors duration-300 
-									${selectedDialog?.id === dialog.id ? 'bg-blue-200' : 'bg-white'} 
-									hover:bg-[#EBECF2]`}
+                  ${selectedDialog?.id === dialog.id ? 'bg-blue-200' : 'bg-white'} 
+                  hover:bg-gray-200 pl-3`}
 								onClick={() => handleDialogClick(dialog)}
 							>
-								<div
-									style={{
-										width: '40px',
-										height: '40px',
-										borderRadius: '50%',
-										backgroundColor: '#F2F2F2',
-										color: '#000000',
-										display: 'flex',
-										justifyContent: 'center',
-										alignItems: 'center',
-										marginRight: '8px',
-										fontSize: '14px',
-										fontWeight: '600',
-										lineHeight: '16.8px',
-									}}
-								>
-									{getInitials(dialog.name)}
-								</div>
+								<div className='w-10 h-10 rounded-full bg-gray-200 text-black flex justify-center items-center mr-2'>{getInitials(dialog.name)}</div>
 								<div>
-									<p style={{ color: '#000000', fontSize: '14px', fontWeight: '600', lineHeight: '16.8px' }}>{dialog.name}</p>
-									<p
-										style={{
-											fontSize: '14px',
-											fontWeight: '400',
-											lineHeight: '16.8px',
-											color: '#777B8C',
-										}}
-									>
-										{typingUsers[dialog.id] ? typingUsers[dialog.id] + ' печатает...' : messages[dialog.id]?.length > 0 ? messages[dialog.id][messages[dialog.id].length - 1].text : 'Нет сообщений'}
-									</p>
+									<p className='text-black text-sm font-semibold'>{dialog.name}</p>
+									<p className='text-sm font-light text-gray-600'>{typingUsers[dialog.id] ? `${typingUsers[dialog.id]} печатает...` : messages[dialog.id]?.length > 0 ? trimMessage(messages[dialog.id][messages[dialog.id].length - 1].text) : 'Нет сообщений'}</p>
 								</div>
 							</button>
 						</div>
@@ -155,6 +129,10 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUs
 			/>
 		</div>
 	)
+}
+
+const trimMessage = (text: string) => {
+	return text.length > 40 ? text.substring(0, 40) + '...' : text
 }
 
 export default Manager
