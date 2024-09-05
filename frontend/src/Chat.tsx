@@ -43,8 +43,8 @@ const Chat: React.FC<ChatProps> = ({ selectedDialog, messages, userId, message, 
 								<div
 									className={`absolute bottom-0 left-[-14px]`}
 									style={{
-										width: '14px', // Ширина заостренного угла
-										height: '24px', // Высота заостренного угла
+										width: '14px',
+										height: '24px',
 										backgroundColor: msg.user === userId ? '#B9D7FB' : '#E2EAF1',
 									}}
 								></div>
@@ -52,9 +52,9 @@ const Chat: React.FC<ChatProps> = ({ selectedDialog, messages, userId, message, 
 									className='absolute rounded-full bottom-0 left-[-14px] '
 									style={{
 										backgroundColor: '#f1f1f1',
-										borderRadius: '0% 0% 100% 0%', // Закругление углов
-										width: '14px', // Ширина заостренного угла
-										height: '24px', // Высота заостренного угла
+										borderRadius: '0% 0% 100% 0%',
+										width: '14px',
+										height: '24px',
 									}}
 								></div>
 							</div>
@@ -72,6 +72,4 @@ const Chat: React.FC<ChatProps> = ({ selectedDialog, messages, userId, message, 
 		</>
 	)
 }
-// Функция для обрезки текста сообщения до 50 символов
-
 export default Chat

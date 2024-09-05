@@ -5,25 +5,11 @@ import ImageSlider from './ImageSlider'
 import Manager from './Manager'
 import ClientChat from './ClientChat'
 
-const socket = io('http://localhost:3000') // Подключение к серверу
+const socket = io('http://localhost:3000')
 
 const App: React.FC = () => {
-	const [userId, setUserId] = useState<string>('') // Статус для userId
+	const [userId, setUserId] = useState<string>('')
 	const [typingUsers, setTypingUsers] = useState<{ [key: string]: string }>({})
-
-	function userIdDialog(str: string): number {
-		let result = ''
-		Array.from(str.toLowerCase()).forEach((char) => {
-			if (char >= 'a' && char <= 'z') {
-				const position = (char.charCodeAt(0) - 'a'.charCodeAt(0) + 1).toString()
-				if (result.length < 15) {
-					result += position
-				}
-			}
-		})
-		return Number(result)
-	}
-	console.log(userIdDialog(userId))
 
 	const getInitials = (id: any) => {
 		const words = id.toUpperCase().split(' ')
@@ -31,12 +17,11 @@ const App: React.FC = () => {
 	}
 
 	useEffect(() => {
-		// Установить userId, если socket.id доступен
 		socket.on('connect', () => {
-			setUserId(socket.id || '') // Сохраняем текущий socket.id
+			setUserId(socket.id || '')
 		})
 
-		socket.on('typing', ({ dialogId, user }: { dialogId: number; user: string }) => {
+		socket.on('typing', ({ dialogId, user }: { dialogId: string; user: string }) => {
 			setTypingUsers((prev) => ({
 				...prev,
 				[dialogId]: user,
@@ -51,7 +36,6 @@ const App: React.FC = () => {
 			})
 		})
 
-		// Очищаем сокет при размонтировании компонента
 		return () => {
 			socket.off('connect')
 			socket.off('typing')
@@ -68,11 +52,11 @@ const App: React.FC = () => {
 					element={
 						<div className='flex h-screen w-full pt-10'>
 							<ImageSlider />
-							<ClientChat userIdDialog={userIdDialog} userId={userId} socket={socket} getInitials={getInitials} typingUsers={typingUsers} />
+							<ClientChat userId={userId} socket={socket} getInitials={getInitials} typingUsers={typingUsers} />
 						</div>
 					}
 				/>
-				<Route path='/manager' element={<Manager userIdDialog={userIdDialog} typing='' typingUsers={typingUsers} getInitials={getInitials} userId={userId} socket={socket} />} />
+				<Route path='/manager' element={<Manager typing='' typingUsers={typingUsers} getInitials={getInitials} userId={userId} socket={socket} />} />
 			</Routes>
 		</Router>
 	)

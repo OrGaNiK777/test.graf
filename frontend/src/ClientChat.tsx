@@ -2,12 +2,11 @@ import React, { useEffect, useState } from 'react'
 import { ClientChatProps, Message } from './interfaces/interfaces'
 import Chat from './Chat'
 
-const ClientChat: React.FC<ClientChatProps> = ({ userId, socket, getInitials, typingUsers, userIdDialog }) => {
+const ClientChat: React.FC<ClientChatProps> = ({ userId, socket, getInitials, typingUsers }) => {
 	const [message, setMessage] = useState('')
 	const [messages, setMessages] = useState<{ [key: number]: Message[] }>({})
 
 	useEffect(() => {
-		// Слушаем сообщения от других пользователей
 		socket.on('message', ({ dialogId, message }: { dialogId: number; message: Message }) => {
 			setMessages((prevMessages) => ({
 				...prevMessages,
@@ -24,8 +23,7 @@ const ClientChat: React.FC<ClientChatProps> = ({ userId, socket, getInitials, ty
 		e.preventDefault()
 
 		if (message.trim()) {
-			const messageObject: Message = { id: Date.now(), user: userId, text: message, dialogId: userIdDialog(userId) }
-			// Отправляем сообщение на сервер
+			const messageObject: Message = { id: Date.now(), user: userId, text: message, dialogId: userId }
 			socket.emit('message', { dialogId: userId, message: messageObject })
 			setMessage('')
 		}

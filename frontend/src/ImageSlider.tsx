@@ -5,7 +5,6 @@ const ImageSlider: React.FC = () => {
 	const [currentIndex, setCurrentIndex] = useState(0)
 
 	useEffect(() => {
-		// Загружаем изображения с сервера
 		fetch('http://localhost:3000/images')
 			.then((response) => response.json())
 			.then((data) => setImages(data))
