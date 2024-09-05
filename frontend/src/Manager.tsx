@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Dialog, ManagerProps, Message } from './interfaces/interfaces'
 import ManagerChat from './ManagerChat'
 
-const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUsers }) => {
+const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUsers, userIdDialog }) => {
 	const [dialogs, setDialogs] = useState<Dialog[]>([])
 	const [selectedDialog, setSelectedDialog] = useState<Dialog | null>(null)
 	const [message, setMessage] = useState('')
@@ -60,11 +60,12 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUs
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault()
 		if (message.trim() && selectedDialog) {
+			console.log(userIdDialog(selectedDialog.id))
 			const messageObject: Message = {
 				id: Date.now(),
 				user: userId,
 				text: message,
-				dialogId: selectedDialog.id,
+				dialogId: userIdDialog(selectedDialog.id),
 			}
 			socket.emit('message', { dialogId: selectedDialog.id, message: messageObject })
 

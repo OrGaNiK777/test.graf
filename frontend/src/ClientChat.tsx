@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { ClientChatProps, Message } from './interfaces/interfaces'
 import Chat from './Chat'
 
-const ClientChat: React.FC<ClientChatProps> = ({ userId, socket, getInitials, typingUsers }) => {
+const ClientChat: React.FC<ClientChatProps> = ({ userId, socket, getInitials, typingUsers, userIdDialog }) => {
 	const [message, setMessage] = useState('')
 	const [messages, setMessages] = useState<{ [key: number]: Message[] }>({})
 
@@ -24,7 +24,7 @@ const ClientChat: React.FC<ClientChatProps> = ({ userId, socket, getInitials, ty
 		e.preventDefault()
 
 		if (message.trim()) {
-			const messageObject: Message = { id: Date.now(), user: userId, text: message, dialogId: -1 }
+			const messageObject: Message = { id: Date.now(), user: userId, text: message, dialogId: userIdDialog(userId) }
 			// Отправляем сообщение на сервер
 			socket.emit('message', { dialogId: userId, message: messageObject })
 			setMessage('')

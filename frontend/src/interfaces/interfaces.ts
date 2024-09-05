@@ -21,9 +21,11 @@ export interface ManagerProps {
 	socket: Socket // Замените на точный тип, если у вас есть конкретный тип для сокета
 	getInitials: (name: string) => string
 	typing: string
+	userIdDialog: (str: string | number) => number
 }
 
 export interface ClientChatProps {
+	userIdDialog: (str: string | number) => number
 	userId: string // ID текущего пользователя
 	socket: Socket // Экземпляр сокета (обычно можно уточнить тип, если есть)
 	getInitials: (name: string) => string // Функция для получения инициалов
