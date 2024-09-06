@@ -4,7 +4,7 @@ export interface Message {
 	id: number
 	user: string
 	text: string
-	dialogId: any
+	dialogId: number
 }
 
 export interface Dialog {
@@ -19,9 +19,11 @@ export interface ManagerProps {
 	socket: Socket
 	getInitials: (name: string) => string
 	typing: string
+	userIdDialog: (str: string) => number
 }
 
 export interface ClientChatProps {
+	userIdDialog: number
 	userId: string
 	socket: Socket
 	getInitials: (name: string) => string

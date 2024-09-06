@@ -2,40 +2,44 @@ import React, { useEffect, useState } from 'react'
 import { Dialog, ManagerProps, Message } from './interfaces/interfaces'
 import ManagerChat from './ManagerChat'
 
-const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUsers }) => {
+const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUsers, userIdDialog }) => {
 	const [dialogs, setDialogs] = useState<Dialog[]>([])
 	const [selectedDialog, setSelectedDialog] = useState<Dialog | null>(null)
 	const [message, setMessage] = useState('')
 	const [messages, setMessages] = useState<{ [key: string]: Message[] }>({})
 
 	useEffect(() => {
+		console.log(messages)
 		if (selectedDialog) {
-			socket.emit('getPreviousMessages', selectedDialog.id)
+			socket.emit('getPreviousMessages', selectedDialog.name)
 		}
 
 		socket.on('dialogs', (updatedDialogs: Dialog[]) => {
 			setDialogs(updatedDialogs)
 		})
 
-		socket.on('message', ({ dialogId, message }: { dialogId: number; message: Message }) => {
+		socket.on('message', ({ user, dialogId, message }: { user: string; dialogId: number; message: Message }) => {
 			if (message.user !== userId) {
 				setMessages((prevMessages) => ({
 					...prevMessages,
-					[dialogId]: [...(prevMessages[dialogId] || []), message],
+					[user]: [...(prevMessages[user] || []), message],
 				}))
-					if (selectedDialog?.id !== dialogId) {
-						document.title = `Новое сообщение в ${dialogs.find((dialog) => dialog.id === dialogId)?.name}`
-					}
+				if (selectedDialog?.id !== dialogId) {
+					document.title = `Новое сообщение в ${dialogs.find((dialog) => dialog.id === dialogId)?.name}`
+				}
 			}
 		})
 
 		socket.on('previousMessages', (previousMessages: Message[]) => {
-			const groupedMessages: { [key: number]: Message[] } = {}
+			const groupedMessages: { [key: string]: Message[] } = {}
 
 			previousMessages.forEach((msg) => {
-				if (!groupedMessages[msg.dialogId]) {
-					groupedMessages[msg.dialogId] = []
+				if (!groupedMessages[msg.user]) {
+					groupedMessages[msg.user] = []
 				}
+				console.log(groupedMessages)
+				console.log(groupedMessages[msg.user])
+				console.log(msg)
 				groupedMessages[msg.dialogId].push(msg)
 			})
 
@@ -44,7 +48,6 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUs
 				...groupedMessages,
 			}))
 		})
-		console.log(messages)
 		return () => {
 			socket.off('previousMessages')
 			socket.off('dialogs')
@@ -59,13 +62,13 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUs
 				id: Date.now(),
 				user: userId,
 				text: message,
-				dialogId: selectedDialog.id,
+				dialogId: userIdDialog(selectedDialog.name),
 			}
-			socket.emit('message', { dialogId: selectedDialog.id, message: messageObject })
+			socket.emit('message', { user: selectedDialog.name, dialogId: userIdDialog(selectedDialog.name), message: messageObject })
 
 			setMessages((prevMessages) => ({
 				...prevMessages,
-				[selectedDialog.id]: [...(prevMessages[selectedDialog.id] || []), messageObject],
+				[selectedDialog.name]: [...(prevMessages[selectedDialog.name] || []), messageObject],
 			}))
 
 			setMessage('')
@@ -74,11 +77,12 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUs
 
 	const handleDialogClick = (dialog: Dialog) => {
 		if (selectedDialog) {
-			socket.emit('leaveDialog', selectedDialog.id)
+			socket.emit('leaveDialog', selectedDialog.name)
 		}
 		setSelectedDialog(dialog)
+		console.log(dialog)
 		document.title = dialog.name
-		socket.emit('joinDialog', dialog.id)
+		socket.emit('joinDialog', dialog.name)
 	}
 
 	return (
@@ -96,7 +100,7 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUs
 								<div className='w-10 h-10 rounded-full bg-gray-200 text-black flex justify-center items-center mr-2'>{getInitials(dialog.name)}</div>
 								<div>
 									<p className='text-black text-sm font-semibold'>{dialog.name}</p>
-									<p className='text-sm font-light text-gray-600'>{typingUsers[dialog.id] ? `${typingUsers[dialog.id]} печатает...` : messages[dialog.id]?.length > 0 ? trimMessage(messages[dialog.id][messages[dialog.id].length - 1].text) : trimMessage(dialog.lastMessage)}</p>
+									<p className='text-sm font-light text-gray-600'>{typingUsers[dialog.id] ? `${typingUsers[dialog.id]} печатает...` : messages[dialog.name]?.length > 0 ? trimMessage(messages[dialog.name][messages[dialog.name].length - 1].text) : trimMessage(dialog.lastMessage)}</p>
 								</div>
 							</button>
 						</div>
@@ -118,7 +122,6 @@ const Manager: React.FC<ManagerProps> = ({ userId, socket, getInitials, typingUs
 					}
 				}}
 				handleBlur={() => {
-					;``
 					socket.emit('stop_typing')
 				}}
 			/>

@@ -11,7 +11,20 @@ const App: React.FC = () => {
 	const [userId, setUserId] = useState<string>('')
 	const [typingUsers, setTypingUsers] = useState<{ [key: string]: string }>({})
 
-	const getInitials = (id: any) => {
+	function userIdDialog(str: string): number {
+		let result = ''
+		Array.from(str.toLowerCase()).forEach((char) => {
+			if (char >= 'a' && char <= 'z') {
+				const position = (char.charCodeAt(0) - 'a'.charCodeAt(0) + 1).toString()
+				if (result.length < 15) {
+					result += position
+				}
+			}
+		})
+		return Number(result)
+	}
+
+	const getInitials = (id: string) => {
 		const words = id.toUpperCase().split(' ')
 		return words.length > 1 ? words[0][0] + words[1][0] : words[0].substring(0, 2)
 	}
@@ -41,7 +54,7 @@ const App: React.FC = () => {
 			socket.off('typing')
 			socket.off('user_stopped_typing')
 		}
-	}, [userId, socket])
+	}, [userId])
 
 	return (
 		<Router>
@@ -52,11 +65,11 @@ const App: React.FC = () => {
 					element={
 						<div className='flex h-screen w-full pt-10'>
 							<ImageSlider />
-							<ClientChat userId={userId} socket={socket} getInitials={getInitials} typingUsers={typingUsers} />
+							<ClientChat userIdDialog={userIdDialog(userId)} userId={userId} socket={socket} getInitials={getInitials} typingUsers={typingUsers} />
 						</div>
 					}
 				/>
-				<Route path='/manager' element={<Manager typing='' typingUsers={typingUsers} getInitials={getInitials} userId={userId} socket={socket} />} />
+				<Route path='/manager' element={<Manager userIdDialog={userIdDialog} typing='' typingUsers={typingUsers} getInitials={getInitials} userId={userId} socket={socket} />} />
 			</Routes>
 		</Router>
 	)

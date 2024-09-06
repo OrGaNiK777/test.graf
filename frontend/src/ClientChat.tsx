@@ -2,15 +2,15 @@ import React, { useEffect, useState } from 'react'
 import { ClientChatProps, Message } from './interfaces/interfaces'
 import Chat from './Chat'
 
-const ClientChat: React.FC<ClientChatProps> = ({ userId, socket, getInitials, typingUsers }) => {
+const ClientChat: React.FC<ClientChatProps> = ({ userId, socket, getInitials, typingUsers, userIdDialog }) => {
 	const [message, setMessage] = useState('')
 	const [messages, setMessages] = useState<{ [key: number]: Message[] }>({})
 
 	useEffect(() => {
-		socket.on('message', ({ dialogId, message }: { dialogId: number; message: Message }) => {
+		socket.on('message', ({ user, message }: { user: number; message: Message }) => {
 			setMessages((prevMessages) => ({
 				...prevMessages,
-				[dialogId]: [...(prevMessages[dialogId] || []), message],
+				[user]: [...(prevMessages[user] || []), message],
 			}))
 		})
 
@@ -23,8 +23,8 @@ const ClientChat: React.FC<ClientChatProps> = ({ userId, socket, getInitials, ty
 		e.preventDefault()
 
 		if (message.trim()) {
-			const messageObject: Message = { id: Date.now(), user: userId, text: message, dialogId: userId }
-			socket.emit('message', { dialogId: userId, message: messageObject })
+			const messageObject: Message = { id: Date.now(), user: userId, text: message, dialogId: userIdDialog }
+			socket.emit('message', { user: userId, dialogId: userIdDialog, message: messageObject })
 			setMessage('')
 		}
 	}
@@ -41,12 +41,12 @@ const ClientChat: React.FC<ClientChatProps> = ({ userId, socket, getInitials, ty
 				handleSubmit={handleSubmit}
 				getInitials={getInitials}
 				handleTyping={() => {
-					socket.emit('typing', { dialogId: userId, user: userId })
+					socket.emit('typing', { dialogId: userIdDialog, user: userId })
 				}}
 				handleBlur={() => {
 					socket.emit('stop_typing')
 				}}
-				typing={typingUsers[userId] ? typingUsers[userId] + ' печатает...' : ''}
+				typing={typingUsers[userIdDialog] ? typingUsers[userIdDialog] + ' печатает...' : ''}
 			/>
 		</div>
 	)

@@ -15,9 +15,11 @@ export const setupSocket = (io: Server) => {
 			socket.leave(dialogId)
 		})
 
-		socket.on('getPreviousMessages', (dialogId) => {
+		socket.on('getPreviousMessages', (dialogId: string) => {
+			console.log(dialogId)
 			if (messages[dialogId]) {
 				socket.emit('previousMessages', messages[dialogId])
+				console.log(dialogId)
 			}
 		})
 
@@ -25,7 +27,7 @@ export const setupSocket = (io: Server) => {
 			'dialogs',
 			Object.values(dialogs).map((dialog) => ({
 				...dialog,
-				lastMessage: messages[dialog.id]?.[messages[dialog.id].length - 1].text || null,
+				lastMessage: messages[dialog.name]?.[messages[dialog.name].length - 1].text || null,
 			}))
 		)
 
@@ -37,19 +39,20 @@ export const setupSocket = (io: Server) => {
 			socket.broadcast.emit('user_stopped_typing')
 		})
 
-		socket.on('message', (data: { message: Message; dialogId: string }) => {
-			const { message, dialogId } = data
-			if (!messages[dialogId]) {
-				messages[dialogId] = []
+		socket.on('message', (data: { user: string; message: Message; dialogId: string }) => {
+			const { user, message, dialogId } = data
+			if (!messages[user]) {
+				messages[user] = []
 			}
-			messages[dialogId].push(message)
+			messages[user].push(message)
 
-			if (!dialogs[dialogId]) {
-				console.log(`Создался диалог: ${dialogId}`)
-				dialogs[dialogId] = { id: dialogId, name: dialogId }
+			if (!dialogs[user]) {
+				console.log(`Создался диалог: ${user}`)
+				dialogs[user] = { id: dialogId, name: user }
 			}
-
-			io.emit('message', { dialogId, message })
+			console.log(messages)
+			console.log(dialogs)
+			io.emit('message', { user, dialogId, message })
 			io.emit('dialogs', Object.values(dialogs))
 		})
 
